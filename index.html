@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML vs QML Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h4 {
+            text-align: center;
+        }
+
+        th {
+            font-size: 0.9rem;
+        }
+
+        h2 {
+            padding: 1rem;
+            font-weight: 500;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            background: rgba(245, 239, 239, 0.291);
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        header {
+            background: #24180b;
+            background: #411d16;
+            background: black;
+            color: #fff;
+            padding: 2px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        header p {
+            font-size: 1.2em;
+        }
+
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #dbdbdb;
+        }
+
+        .section h2 {
+            margin-top: 0;
+            color: black;
+        }
+
+        .input-section input,
+        .input-section button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .input-section button {
+            background-color: #0f70e6;
+            color: #fff;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .input-section button:hover {
+            background-color: #1c5090;
+        }
+
+        .results-table,
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .results-table th,
+        .results-table td,
+        .data-table th,
+        .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .results-table th,
+        .data-table th {
+            background-color: #0f70e6;
+            color: #fff;
+        }
+
+        #generatedDataSection {
+            display: none;
+        }
+
+        .results-table tr:nth-child(even),
+        .data-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .results-table tr:hover,
+        .data-table tr:hover {
+            background-color: #ddd;
+        }
+
+        .algorithm-button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: #0f70e6;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #comparison-chart {
+            /* text-align: center; */
+        }
+
+        .algorithm-button:hover {
+            background-color: #115db9;
+        }
+
+        #plot-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #something-wrong {
+            text-align: center;
+        }
+
+        /* Responsive Styles */
+
+        /* For tablets and larger phones (up to 768px) */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            header p {
+                font-size: 1em;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .input-section input,
+            .input-section button {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+
+            .results-table th,
+            .results-table td,
+            .data-table th,
+            .data-table td {
+                font-size: 0.8em;
+            }
+
+            .algorithm-button {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* For mobile phones (up to 480px) */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            header p {
+                font-size: 0.9em;
+            }
+
+            .section {
+                padding: 10px;
+            }
+
+            .input-section input,
+            .input-section button {
+                padding: 6px;
+                font-size: 0.8em;
+            }
+
+            .results-table th,
+            .results-table td,
+            .data-table th,
+            .data-table td {
+                font-size: 0.7em;
+            }
+
+            .algorithm-button {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+
+        .spinner {
+            position: fixed;
+            left: 50%;
+            text-align: left !important;
+            top: 50%;
+            width: 60px;
+            height: 60px;
+            border: 8px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 8px solid #0f70e6;
+            animation: spin 1s linear infinite;
+            z-index: 1000;
+            /* Ensure it appears above other content */
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <!-- <h1>ML vs QML Demo</h1> -->
+            <h3>Machine Learning Model Exploration Classical vs Quantum</h3>
+          
+        </div>
+
+    </header>
+
+    <div class="container">
+        <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on user-selected
+            data.</h4>
+           
+        <!-- Input Section -->
+        <div class="section input-section">
+            <h2>Input Data</h2>
+            <label for="training_size">Training Size:</label>
+            <input type="number" id="training_size" placeholder="Enter training size">
+
+            <label for="test_size">Test Size:</label>
+            <input type="number" id="test_size" placeholder="Enter test size">
+
+            <label for="adhoc_dimension">Ad-hoc Dimension:</label>
+            <input type="number" id="adhoc_dimension" placeholder="Enter (2 or 3)">
+
+            <button onclick="generateData()">Generate Data</button>
+            <div id="spinner" style="display: none;margin-top: 20px;">
+                <p>Loading...</p>
+                <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
+                <!-- <p>Loading...</p> -->
+            </div>
+        </div>
+
+        <!-- Data Display Section -->
+        <div id="generatedDataSection" class="section">
+            <h2>Generated Data</h2>
+            <p id="data-info"></p>
+            <h4 id="heading-data">Training Data (Top 5 Sample)</h4>
+            <table id="trainTable" class="data-table">
+                <thead>
+                    <tr>
+                        <!-- Column headers will be added dynamically -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Training data rows will be added dynamically -->
+                </tbody>
+            </table>
+
+            <h4 id="heading-data">Testing Data (Top 5 Sample)</h4>
+            <table id="testTable" class="data-table">
+                <thead>
+                    <tr>
+                        <!-- Column headers will be added dynamically -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Testing data rows will be added dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Classical Algorithms Section -->
+        <div class="section">
+            <h2>Classical Algorithms</h2>
+            <button class="algorithm-button" onclick="runClassical('logistic-regression')">Logistic Regression</button>
+            <button class="algorithm-button" onclick="runClassical('decision-tree')">Decision Tree</button>
+            <button class="algorithm-button" onclick="runClassical('random-forest')">Random Forest</button>
+            <button class="algorithm-button" onclick="runClassical('naive-bayes')">Naive Bayes</button>
+            <button class="algorithm-button" onclick="runClassical('gradient-boosting')">Gradient Boosting</button>
+              <div id="spinner-classical" style="display: none;margin-top: 20px;">
+                <p>Loading...</p>
+                <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
+                <!-- <p>Loading...</p> -->
+            </div>
+        </div>
+
+        <!-- Quantum Algorithms Section -->
+        <div class="section">
+            <h2>Quantum Algorithms</h2>
+            <button class="algorithm-button" onclick="runQuantum('vqc')">Variational Quantum Classifier (VQC)</button>
+            <button class="algorithm-button" onclick="runQuantum('classical-qsvm')">Classical SVM with Quantum Kernel
+            </button>
+            <button class="algorithm-button" onclick="runQuantum('quantum-qsvm')">Quantum Support Vector Machine
+                (QSVM)</button>
+                <div id="spinner-quantum" style="display: none;margin-top: 20px;">
+                    <p>Loading...</p>
+                    <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
+                    <!-- <p>Loading...</p> -->
+                </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="section">
+            <h2>Results</h2>
+            <table id="resultsTable" class="results-table">
+                <thead>
+                    <tr>
+                        <th>Classifier</th>
+                        <th>Model</th>
+                        <th>Train Accuracy</th>
+                        <th>Train Precision</th>
+                        <th>Train Recall</th>
+                        <th>Test Accuracy</th>
+                        <th>Test Precision</th>
+                        <th>Test Recall</th>
+                        <th>Training Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Results will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <div id="comparison-chart" class="section">
+            <h2>Comparison Chart</h2>
+            <button class="algorithm-button" onclick="compareResults()">Compare Results</button>
+            <div id="plot-container">
+                <!-- The plot will be inserted here -->
+            </div>
+        </div>
+
+        <!-- <section id="comparison">
+            <h2>Comparison of Test Recall</h2>
+            <img src="http://localhost:5000/plot" alt="Comparison Plot">
+        </section> -->
+
+        
+    </div>
+
+    <script>
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'block';
+        }
+
+        function hideSpinner() {
+            document.getElementById('spinner').style.display = 'none';
+        }
+        function showClassicalSpinner() {
+            document.getElementById('spinner-classical').style.display = 'block';
+        }
+
+        function hideClassicalSpinner() {
+            document.getElementById('spinner-classical').style.display = 'none';
+        }
+        function showQuantumSpinner() {
+            document.getElementById('spinner-quantum').style.display = 'block';
+        }
+
+        function hideQuantumSpinner() {
+            document.getElementById('spinner-quantum').style.display = 'none';
+        }
+        
+        function compareResults() {
+            // Get the plot container
+            const plotContainer = document.getElementById('plot-container');
+
+            // Create an image element
+            const img = document.createElement('img');
+            img.src = 'http://localhost:5000/comparison-plot';  // API endpoint
+            img.alt = 'Comparison Plot';
+            img.style.width = '60%';  // Adjust the size as needed
+
+            // Create a message element
+            const message = document.createElement('p');
+            message.textContent = 'No plot found. Please train the model.';
+            message.style.display = 'none';  // Initially hidden
+
+            // Handle image load errors
+            img.onerror = function () {
+                // Show the message if the image fails to load
+                message.style.display = 'block';
+            };
+
+            // Handle successful image load
+            img.onload = function () {
+                // Hide the message if the image loads successfully
+                message.style.display = 'none';
+            };
+
+            // Clear any existing content in the plot container
+            plotContainer.innerHTML = '';
+
+            // Append the new image to the plot container
+            plotContainer.appendChild(img);
+
+            // Append the message to the plot container
+            plotContainer.appendChild(message);
+        }
+
+        function generateData() {
+            showSpinner();
+            const training_size = parseInt(document.getElementById('training_size').value / 2);
+            const test_size = parseInt(document.getElementById('test_size').value / 2);
+            const adhoc_dimension = parseInt(document.getElementById('adhoc_dimension').value);
+
+            fetch('http://127.0.0.1:5000/generate-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ training_size, test_size, adhoc_dimension })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    hideSpinner();
+                    if (data.error) {
+                        document.getElementById('generatedDataSection').style.display = 'block';
+                        const h4Elements = document.querySelectorAll('#generatedDataSection h4');
+                        h4Elements.forEach(h4 => {
+                            h4.style.display = 'none';
+                        });
+                        // Show data shapes and imbalance ratios
+
+                        document.getElementById('data-info').innerHTML = `
+                    <p id="something-wrong">Something went wrong! please select the correct input and generate again!</p>
+                `;
+                        return null
+                    }
+                    // debugger
+                    document.getElementById('generatedDataSection').style.display = 'block';
+                    // Show data shapes and imbalance ratios
+                    document.getElementById('data-info').innerHTML = `
+                    <ul>
+                    <li><strong>Training Data Shape:</strong> ${data.train_shape[0]} rows x ${data.train_shape[1]} columns</li>
+                    <li><strong>Testing Data Shape:</strong> ${data.test_shape[0]} rows x ${data.test_shape[1]} columns</li>
+                    <li><strong>Training Data Imbalance Ratio:</strong> Label 1 ${data.train_imbalance_ratio['Label 1']} - Label 0 ${data.train_imbalance_ratio['Label 0']}</li>
+                    <li><strong>Testing Data Imbalance Ratio: </strong> sLabel 1 ${data.test_imbalance_ratio['Label 1']} - Label 0 ${data.test_imbalance_ratio['Label 0']}</li>
+                </ul>
+                `;
+
+                    // Populate tables
+                    function populateTable(tableId, data, columns) {
+                        const table = document.getElementById(tableId);
+                        const thead = table.querySelector('thead tr');
+                        const tbody = table.querySelector('tbody');
+
+                        // Clear previous contents
+                        thead.innerHTML = '';
+                        tbody.innerHTML = '';
+
+                        // Add headers
+                        columns.forEach(col => {
+                            const th = document.createElement('th');
+                            th.innerText = col;
+                            thead.appendChild(th);
+                        });
+
+                        // Add rows
+                        data.forEach(row => {
+                            const tr = document.createElement('tr');
+                            columns.forEach(col => {
+                                const td = document.createElement('td');
+                                td.innerText = row[col];
+                                tr.appendChild(td);
+                            });
+                            tbody.appendChild(tr);
+                        });
+                    }
+
+                    // Prepare column headers
+                    const trainColumns = Object.keys(data.train_data[0]);
+                    const testColumns = Object.keys(data.test_data[0]);
+
+                    // Populate tables
+                    populateTable('trainTable', data.train_data, trainColumns);
+                    populateTable('testTable', data.test_data, testColumns);
+                    const tbody = document.querySelector("#resultsTable tbody");
+
+                    // Remove all rows from tbody
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function runClassical(algorithm) {
+            showClassicalSpinner();
+            const training_size = parseInt(document.getElementById('training_size').value);
+            const test_size = parseInt(document.getElementById('test_size').value);
+
+            fetch(`http://127.0.0.1:5000/${algorithm}`, {
+                headers: { 'Content-Type': 'application/json' },
+            })
+                .then(response => response.json())
+                .then(result => {
+                    debugger;
+                    hideClassicalSpinner();
+                    const resultsTable = document.getElementById('resultsTable').querySelector('tbody');
+                    const newRow = resultsTable.insertRow();
+                    newRow.insertCell(0).innerText = result.classifier_type;
+                    newRow.insertCell(1).innerText = result.model_type;
+                    newRow.insertCell(2).innerText = result.train_accuracy;
+                    newRow.insertCell(3).innerText = result.train_precision;
+                    newRow.insertCell(4).innerText = result.train_recall;
+                    newRow.insertCell(5).innerText = result.test_accuracy;
+                    newRow.insertCell(6).innerText = result.test_precision;
+                    newRow.insertCell(7).innerText = result.test_recall;
+                    newRow.insertCell(8).innerText = result.training_time
+
+                })
+                .catch(error => {
+                    debugger
+                    alert('Something went wrong. Please generate the data before training.');
+                    console.error('Error:', error)
+                });
+        }
+
+        function runQuantum(algorithm) {
+            const training_size = parseInt(document.getElementById('training_size').value);
+            const test_size = parseInt(document.getElementById('test_size').value);
+            showQuantumSpinner();
+            fetch(`http://127.0.0.1:5000/${algorithm}`, {
+                headers: { 'Content-Type': 'application/json' },
+            })
+                .then(response => response.json())
+                .then(result => {
+                    hideQuantumSpinner();
+                    const resultsTable = document.getElementById('resultsTable').querySelector('tbody');
+                    const newRow = resultsTable.insertRow();
+                    newRow.insertCell(0).innerText = result.classifier_type;
+                    newRow.insertCell(1).innerText = result.model_type;
+                    newRow.insertCell(2).innerText = result.train_accuracy;
+                    newRow.insertCell(3).innerText = result.train_precision;
+                    newRow.insertCell(4).innerText = result.train_recall;
+                    newRow.insertCell(5).innerText = result.test_accuracy;
+                    newRow.insertCell(6).innerText = result.test_precision;
+                    newRow.insertCell(7).innerText = result.test_recall;
+                    newRow.insertCell(8).innerText = result.training_time
+
+                })
+                .catch(error => {
+                    debugger
+                    alert('Something went wrong. Please generate the data before training.');
+                    console.error('Error:', error)
+                });
+        }
+    </script>
+</body>
+
+</html>
