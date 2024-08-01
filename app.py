@@ -494,5 +494,5 @@ def plot():
     
     # Return the image as a response
     return send_file(img, mimetype='image/png')
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+# if __name__ == '__main__':
+#     app.run(host="0.0.0.0", debug=True)
