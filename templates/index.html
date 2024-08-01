@@ -17,6 +17,7 @@
 
         h4 {
             text-align: center;
+            font-size: 1.2rem
         }
 
         th {
@@ -250,6 +251,10 @@
                 transform: rotate(360deg);
             }
         }
+        #disclaimer span{
+            font-weight: 400 ;
+            color: rgb(183, 39, 39)
+        }
     </style>
 </head>
 
@@ -264,8 +269,8 @@
     </header>
 
     <div class="container">
-        <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on user-selected
-            data.</h4>
+        <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on Adhoc data
+            </h4>
            
         <!-- Input Section -->
         <div class="section input-section">
@@ -285,6 +290,7 @@
                 <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
                 <!-- <p>Loading...</p> -->
             </div>
+            <h5 id="disclaimer"><strong>Disclaimer: </Strong><span>Currenlty Ad-hoc Algorithm is supporting only upto 3 features we will scale it more soon.</span></h5>
         </div>
 
         <!-- Data Display Section -->
@@ -385,6 +391,7 @@
     </div>
 
     <script>
+        baseURL = 'https://classical-vs-quantum-ml-model-comparison.onrender.com/'
         function showSpinner() {
             document.getElementById('spinner').style.display = 'block';
         }
@@ -450,7 +457,7 @@
             const test_size = parseInt(document.getElementById('test_size').value / 2);
             const adhoc_dimension = parseInt(document.getElementById('adhoc_dimension').value);
 
-            fetch('http://127.0.0.1:5000/generate-data', {
+            fetch(`${baseURL}/generate-data`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ training_size, test_size, adhoc_dimension })
@@ -534,7 +541,7 @@
             const training_size = parseInt(document.getElementById('training_size').value);
             const test_size = parseInt(document.getElementById('test_size').value);
 
-            fetch(`http://127.0.0.1:5000/${algorithm}`, {
+            fetch(`${baseURL}//${algorithm}`, {
                 headers: { 'Content-Type': 'application/json' },
             })
                 .then(response => response.json())
@@ -565,7 +572,7 @@
             const training_size = parseInt(document.getElementById('training_size').value);
             const test_size = parseInt(document.getElementById('test_size').value);
             showQuantumSpinner();
-            fetch(`http://127.0.0.1:5000/${algorithm}`, {
+            fetch(`${baseURL}/${algorithm}`, {
                 headers: { 'Content-Type': 'application/json' },
             })
                 .then(response => response.json())
