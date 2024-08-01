@@ -27,11 +27,15 @@ from qiskit_algorithms.optimizers import SPSA, COBYLA, L_BFGS_B, POWELL
 import os
 from qiskit_machine_learning.algorithms import VQC
 import time
+from flask import Flask, jsonify, request, render_template
 import io
 
 app = Flask(__name__)
 CORS(app) 
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def generate_data(training_size, test_size, adhoc_dimension):
     # Generate ad-hoc data
