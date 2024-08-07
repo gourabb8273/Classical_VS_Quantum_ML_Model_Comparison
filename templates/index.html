@@ -90,6 +90,49 @@
             background-color: #1c5090;
         }
 
+        .radio-group {
+            margin-bottom: 20px;
+        }
+
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            border: 2px solid #007bff;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #007bff;
+            background-color: #fff;
+            margin-right: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .radio-group input[type="radio"]:checked+label {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        .radio-group label::before {
+            content: '';
+            display: block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #007bff;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .radio-group input[type="radio"]:checked+label::before {
+            background-color: #fff;
+        }
+
         .results-table,
         .data-table {
             width: 100%;
@@ -251,9 +294,24 @@
                 transform: rotate(360deg);
             }
         }
-        #disclaimer span{
-            font-weight: 400 ;
+
+        #disclaimer span {
+            font-weight: 400;
             color: rgb(183, 39, 39)
+        }
+
+        .option {
+            padding: 1.3rem;
+            /* text-align: center; */
+        }
+
+        .inp-body {
+            padding: 1rem;
+            /* font-size: 15px; */
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -263,17 +321,17 @@
         <div class="container">
             <!-- <h1>ML vs QML Demo</h1> -->
             <h3>Machine Learning Model Exploration Classical vs Quantum</h3>
-          
+
         </div>
 
     </header>
 
     <div class="container">
         <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on Adhoc data
-            </h4>
-           
+        </h4>
+
         <!-- Input Section -->
-        <div class="section input-section">
+        <!-- <div class="section input-section">
             <h2>Input Data</h2>
             <label for="training_size">Training Size:</label>
             <input type="number" id="training_size" placeholder="Enter training size">
@@ -285,12 +343,52 @@
             <input type="number" id="adhoc_dimension" placeholder="Enter (2 or 3)">
 
             <button onclick="generateData()">Generate Data</button>
+            <button onclick="generateFraudData()">Generate Data</button>
             <div id="spinner" style="display: none;margin-top: 20px;">
                 <p>Loading...</p>
-                <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
-                <!-- <p>Loading...</p> -->
             </div>
             <h5 id="disclaimer"><strong>Disclaimer: </Strong><span>Currenlty Ad-hoc Algorithm is supporting only upto 3 features we will scale it more soon.</span></h5>
+        </div> -->
+        <div class="section input-section">
+            <h2>Input Data</h2>
+
+            <!-- Radio buttons for selecting data type -->
+            <div class="option">
+                <input type="radio" id="adhoc_data" name="data_type" value="adhoc" checked>
+                <label for="adhoc_data">Ad-hoc Data Generation</label>
+
+                <input type="radio" id="real_fraud_data" name="data_type" value="real">
+                <label for="real_fraud_data">Real Fraud Data Generation</label>
+            </div>
+
+            <div class="inp-body">
+                <label for="training_size">Training Size:</label>
+                <input type="number" id="training_size" placeholder="Enter train records">
+
+                <label for="test_size">Test Size:</label>
+                <input type="number" id="test_size" placeholder="Enter test records">
+
+                <label for="adhoc_dimension">Feature Dimension:</label>
+                <input type="number" id="adhoc_dimension" placeholder="Enter value">
+                <div id="imbalanced_ratio_container" class="hidden">
+                    <label for="imbalanced_ratio">Imbalanced Data Ratio:</label>
+                    <input type="number" id="imbalanced_ratio" placeholder="e.g. 0.5" step="0.01" min="0">
+                </div>
+                <!--         
+            <button onclick="generatedData()">Generate Ad-hoc Data</button>
+            <button onclick="generateFraudData()">Generate Fraud Data</button> -->
+                <button id="generate_adhoc" onclick="generateData()">Generate Ad-hoc Data</button>
+                <button id="generate_fraud" style="display: none;" onclick="generateFraudData()">Generate Fraud
+                    Data</button>
+
+                <div id="spinner" style="display: none; margin-top: 20px;">
+                    <p>Loading...</p>
+                </div>
+
+                <h5 id="disclaimer"><strong>Disclaimer: </strong><span>Currently, Ad-hoc Algorithm is supporting only up
+                        to
+                        3 features and Real Fraud data till 30 feature we will scale it more soon.</span></h5>
+            </div>
         </div>
 
         <!-- Data Display Section -->
@@ -330,7 +428,7 @@
             <button class="algorithm-button" onclick="runClassical('random-forest')">Random Forest</button>
             <button class="algorithm-button" onclick="runClassical('naive-bayes')">Naive Bayes</button>
             <button class="algorithm-button" onclick="runClassical('gradient-boosting')">Gradient Boosting</button>
-              <div id="spinner-classical" style="display: none;margin-top: 20px;">
+            <div id="spinner-classical" style="display: none;margin-top: 20px;">
                 <p>Loading...</p>
                 <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
                 <!-- <p>Loading...</p> -->
@@ -345,11 +443,11 @@
             </button>
             <button class="algorithm-button" onclick="runQuantum('quantum-qsvm')">Quantum Support Vector Machine
                 (QSVM)</button>
-                <div id="spinner-quantum" style="display: none;margin-top: 20px;">
-                    <p>Loading...</p>
-                    <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
-                    <!-- <p>Loading...</p> -->
-                </div>
+            <div id="spinner-quantum" style="display: none;margin-top: 20px;">
+                <p>Loading...</p>
+                <!-- <img src="https://www.w3schools.com/howto/spinner.gif" alt="Loading..." style="width: 50px;"> -->
+                <!-- <p>Loading...</p> -->
+            </div>
         </div>
 
         <!-- Results Section -->
@@ -387,11 +485,55 @@
             <img src="http://localhost:5000/plot" alt="Comparison Plot">
         </section> -->
 
-        
+
     </div>
 
     <script>
+
         baseURL = 'https://classical-vs-quantum-ml-model-comparison.onrender.com/'
+        // baseURL = 'http://192.168.31.197:5000'
+        function toggleImbalancedInput() {
+            var dataType = document.querySelector('input[name="data_type"]:checked').value;
+            var imbalancedInput = document.getElementById('imbalanced_ratio_container');
+            if (dataType === 'real') {
+                imbalancedInput.classList.remove('hidden');
+            } else {
+                imbalancedInput.classList.add('hidden');
+            }
+        }
+        function updateUI() {
+            const disclaimer = document.getElementById('disclaimer');
+            const generateAdhocButton = document.getElementById('generate_adhoc');
+            const generateFraudButton = document.getElementById('generate_fraud');
+            const isAdhoc = document.getElementById('adhoc_data').checked;
+
+            if (isAdhoc) {
+                disclaimer.innerHTML = "<strong>Disclaimer: </strong><span>Currently, Ad-hoc Algorithm supports up to a max of 3 features for the current version. We will scale it soon</span>";
+                generateAdhocButton.style.display = 'inline-block';
+                generateFraudButton.style.display = 'none';
+            } else {
+                disclaimer.innerHTML = "<strong>Disclaimer: </strong><span>Currently, Real Fraud data supports only up to 30 features; we will scale it more soon.</span>";
+                generateAdhocButton.style.display = 'none';
+                generateFraudButton.style.display = 'inline-block';
+            }
+        }
+
+        // Event listener for radio button change
+        document.querySelectorAll('input[name="data_type"]').forEach((elem) => {
+            elem.addEventListener('change', updateUI);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var radioButtons = document.querySelectorAll('input[name="data_type"]');
+            radioButtons.forEach(function (radio) {
+                radio.addEventListener('change', toggleImbalancedInput);
+            });
+
+            // Initialize visibility based on the default selection
+            toggleImbalancedInput();
+        });
+
+
         function showSpinner() {
             document.getElementById('spinner').style.display = 'block';
         }
@@ -413,7 +555,7 @@
         function hideQuantumSpinner() {
             document.getElementById('spinner-quantum').style.display = 'none';
         }
-        
+
         function compareResults() {
             // Get the plot container
             const plotContainer = document.getElementById('plot-container');
@@ -451,6 +593,90 @@
             plotContainer.appendChild(message);
         }
 
+        function generateFraudData() {
+            showSpinner();
+            const training_size = parseInt(document.getElementById('training_size').value);
+            const test_size = parseInt(document.getElementById('test_size').value);
+            const adhoc_dimension = parseInt(document.getElementById('adhoc_dimension').value);
+            const imbalance_ratio = parseFloat(document.getElementById('imbalanced_ratio').value);
+            fetch(`${baseURL}/generate-fraud-data`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ training_size, test_size, adhoc_dimension, imbalance_ratio })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    hideSpinner();
+                    if (data.error) {
+                        document.getElementById('generatedDataSection').style.display = 'block';
+                        const h4Elements = document.querySelectorAll('#generatedDataSection h4');
+                        h4Elements.forEach(h4 => {
+                            h4.style.display = 'none';
+                        });
+                        // Show data shapes and imbalance ratios
+
+                        document.getElementById('data-info').innerHTML = `
+                    <p id="something-wrong">Something went wrong! please select the correct input and generate again!</p>
+                `;
+                        return null
+                    }
+                    document.getElementById('generatedDataSection').style.display = 'block';
+                    // Show data shapes and imbalance ratios
+                    document.getElementById('data-info').innerHTML = `
+                    <ul>
+                    <li><strong>Training Data Shape:</strong> ${data.train_shape[0]} rows x ${data.train_shape[1]} columns</li>
+                    <li><strong>Testing Data Shape:</strong> ${data.test_shape[0]} rows x ${data.test_shape[1]} columns</li>
+                    <li><strong>Training Data Imbalance Ratio:</strong> Label 1 ${data.train_imbalance_ratio['Label 1']} - Label 0 ${data.train_imbalance_ratio['Label 0']}</li>
+                    <li><strong>Testing Data Imbalance Ratio: </strong> Label 1 ${data.test_imbalance_ratio['Label 1']} - Label 0 ${data.test_imbalance_ratio['Label 0']}</li>
+                </ul>
+                `;
+
+                    // Populate tables
+                    function populateTable(tableId, data, columns) {
+                        const table = document.getElementById(tableId);
+                        const thead = table.querySelector('thead tr');
+                        const tbody = table.querySelector('tbody');
+
+                        // Clear previous contents
+                        thead.innerHTML = '';
+                        tbody.innerHTML = '';
+
+                        // Add headers
+                        columns.forEach(col => {
+                            const th = document.createElement('th');
+                            th.innerText = col;
+                            thead.appendChild(th);
+                        });
+
+                        // Add rows
+                        data.forEach(row => {
+                            const tr = document.createElement('tr');
+                            columns.forEach(col => {
+                                const td = document.createElement('td');
+                                td.innerText = row[col];
+                                tr.appendChild(td);
+                            });
+                            tbody.appendChild(tr);
+                        });
+                    }
+
+                    // Prepare column headers
+                    const trainColumns = Object.keys(data.train_data[0]);
+                    const testColumns = Object.keys(data.test_data[0]);
+
+                    // Populate tables
+                    populateTable('trainTable', data.train_data, trainColumns);
+                    populateTable('testTable', data.test_data, testColumns);
+                    const tbody = document.querySelector("#resultsTable tbody");
+
+                    // Remove all rows from tbody
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
         function generateData() {
             showSpinner();
             const training_size = parseInt(document.getElementById('training_size').value / 2);
@@ -478,7 +704,6 @@
                 `;
                         return null
                     }
-                    // debugger
                     document.getElementById('generatedDataSection').style.display = 'block';
                     // Show data shapes and imbalance ratios
                     document.getElementById('data-info').innerHTML = `
@@ -486,7 +711,7 @@
                     <li><strong>Training Data Shape:</strong> ${data.train_shape[0]} rows x ${data.train_shape[1]} columns</li>
                     <li><strong>Testing Data Shape:</strong> ${data.test_shape[0]} rows x ${data.test_shape[1]} columns</li>
                     <li><strong>Training Data Imbalance Ratio:</strong> Label 1 ${data.train_imbalance_ratio['Label 1']} - Label 0 ${data.train_imbalance_ratio['Label 0']}</li>
-                    <li><strong>Testing Data Imbalance Ratio: </strong> sLabel 1 ${data.test_imbalance_ratio['Label 1']} - Label 0 ${data.test_imbalance_ratio['Label 0']}</li>
+                    <li><strong>Testing Data Imbalance Ratio: </strong> Label 1 ${data.test_imbalance_ratio['Label 1']} - Label 0 ${data.test_imbalance_ratio['Label 0']}</li>
                 </ul>
                 `;
 
@@ -546,7 +771,6 @@
             })
                 .then(response => response.json())
                 .then(result => {
-                    debugger;
                     hideClassicalSpinner();
                     const resultsTable = document.getElementById('resultsTable').querySelector('tbody');
                     const newRow = resultsTable.insertRow();
@@ -562,7 +786,6 @@
 
                 })
                 .catch(error => {
-                    debugger
                     alert('Something went wrong. Please generate the data before training.');
                     console.error('Error:', error)
                 });
@@ -592,7 +815,6 @@
 
                 })
                 .catch(error => {
-                    debugger
                     alert('Something went wrong. Please generate the data before training.');
                     console.error('Error:', error)
                 });

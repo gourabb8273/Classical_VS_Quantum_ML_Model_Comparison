@@ -90,6 +90,7 @@ def generate_data(training_size, test_size, adhoc_dimension):
 
     return train_df, test_df, train_imbalance_ratio, test_imbalance_ratio
 
+
 @app.route('/generate-data', methods=['POST'])
 def generate_data_endpoint():
     file_path = 'adhoc_data.json'
@@ -160,6 +161,190 @@ def generate_data_endpoint():
     # print(response)
     return jsonify(response), 200
 
+def generate_data_from_csv(training_size, test_size, feature_count, imbalance_ratio):
+    print(training_size, test_size, feature_count, imbalance_ratio)
+    # Load the dataset from CSV
+    df = pd.read_csv('./creditcard.csv')
+    # Remove duplicate rows
+    df = df.drop_duplicates()
+    # Remove rows with any null values
+    df = df.dropna()
+    
+    if 'Time' in df.columns:
+        df = df.drop(columns=['Time'])
+    
+    # Check if 'Class' column exists
+    if 'Class' not in df.columns:
+        raise ValueError("The CSV file must contain a column named 'Class'.")
+    
+    # Ensure feature_count is within the available features
+    if feature_count > len(df.columns) - 1:
+        raise ValueError("Feature count exceeds the number of available features in the dataset.")
+    
+    selected_features = df.iloc[:, :feature_count]
+    selected_features['Class'] = df['Class']
+    
+    df = selected_features
+    
+    # Separate features and labels
+    features = df.drop(columns=['Class'])
+    labels = df['Class']
+    
+    # Calculate the number of samples required for each class in train and test sets
+    def calculate_sample_counts(total_size, imbalance_ratio):
+        if imbalance_ratio >= 1:
+            raise ValueError("Imbalance ratio must be less than 1.")
+        num_class1 = int(total_size * imbalance_ratio)
+        num_class0 = total_size - num_class1
+        return num_class0, num_class1
+
+    def sample_classes(df, class0_count, class1_count):
+        # Separate the majority and minority class samples
+        class0_samples = df[df['Class'] == 0]
+        class1_samples = df[df['Class'] == 1]
+        # print("class1_count",class1_count)
+        # print("len(class1_samples):",len(class1_samples))
+        # print(len(class0_samples),class0_count)
+        # Handle cases where the requested number of samples is more than available
+        if class0_count > len(class0_samples):
+            class0_count = len(class0_samples)
+        if class1_count > len(class1_samples):
+            class1_count = len(class1_samples)
+        # print("class1_count",class1_count)
+        # # Sample the classes
+        if class0_count > 0:
+            class0_samples = class0_samples.sample(n=class0_count, random_state=42)
+            # print(class0_count)
+            # print(class0_samples)
+        if class1_count > 0:
+            print(class1_count)
+            print(class1_samples)
+            class1_samples = class1_samples.sample(n=class1_count, random_state=42)
+
+        # Combine the undersampled classes
+        sampled_df = pd.concat([class0_samples, class1_samples]).sample(frac=1, random_state=42).reset_index(drop=True)
+        # print(sampled_df)
+        return sampled_df
+
+    # Calculate sample counts for training and testing
+    train_class0_count, train_class1_count = calculate_sample_counts(training_size, imbalance_ratio)
+    test_class0_count, test_class1_count = calculate_sample_counts(test_size, imbalance_ratio)
+
+    # Sample data for training and testing sets
+    df_train = sample_classes(df, train_class0_count, train_class1_count)
+    df_test = sample_classes(df, test_class0_count, test_class1_count)
+    
+    # Separate features and labels from the sampled data
+    train_features = df_train.drop(columns=['Class'])
+    train_labels = df_train['Class']
+    test_features = df_test.drop(columns=['Class'])
+    test_labels = df_test['Class']
+    
+    # Prepare results
+    def convert_df_to_list_of_lists(df):
+        return df.values.tolist()
+
+# Assuming train_features, train_labels, test_features, and test_labels are your DataFrames
+# train_features_list = convert_df_to_list_of_lists(train_features)
+# test_features_list = convert_df_to_list_of_lists(test_features)
+
+# Create the result dictionary
+    res = {
+        'train_features': convert_df_to_list_of_lists(train_features),
+        'train_labels': train_labels.tolist(),
+        'test_features': convert_df_to_list_of_lists(test_features),
+        'test_labels': test_labels.tolist()
+    }
+    # res = {
+    #     'train_features': train_features.to_dict(orient='records'),
+    #     'train_labels': train_labels.tolist(),
+    #     'test_features': test_features.to_dict(orient='records'),
+    #     'test_labels': test_labels.tolist()
+    # }
+
+    # Save the results to JSON
+    filename = 'model_results.csv'
+    try:
+        # Check if the file exists
+        if os.path.exists(filename):
+            # Remove the file
+            os.remove(filename)
+            print(f"File '{filename}' has been deleted.")
+        else:
+            print(f"The file '{filename}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred while deleting the file: {e}")
+    with open('adhoc_data.json', 'w') as file:
+        json.dump(res, file, indent=2)
+
+    # Convert to DataFrame for easier display
+    train_df = pd.DataFrame(train_features)
+    train_df['Label'] = train_labels
+    test_df = pd.DataFrame(test_features)
+    test_df['Label'] = test_labels
+    
+    # Calculate class imbalance ratio
+    def calculate_imbalance_ratio(labels):
+        counts = pd.Series(labels).value_counts()
+        total = len(labels)
+        ratio = {f"Label {label}": f"{(count / total * 100):.1f}%" for label, count in counts.items()}
+        return ratio
+
+    train_imbalance_ratio = calculate_imbalance_ratio(train_labels)
+    test_imbalance_ratio = calculate_imbalance_ratio(test_labels)
+
+    return train_df, test_df, train_imbalance_ratio, test_imbalance_ratio
+
+@app.route('/generate-fraud-data', methods=['POST'])
+def generate_fraud_data_endpoint():
+    file_path = 'adhoc_data.json'
+    
+    data = request.json
+    print(data)
+    try:
+        training_size = data['training_size']
+        test_size = data['test_size']
+        adhoc_dimension = data['adhoc_dimension']
+        imbalance_ratio =data['imbalance_ratio']
+    except KeyError:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        train_df, test_df, train_imbalance_ratio, test_imbalance_ratio = generate_data_from_csv(
+            training_size, test_size, adhoc_dimension, imbalance_ratio
+        )
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+    # Filter data to include at least one record of each class
+    def filter_top_records(df):
+        target_column = 'Label'
+    
+        # Filter out rows where any feature value is 0 (excluding the target column)
+        feature_columns = [col for col in df.columns if col != target_column]
+        df = df[df[feature_columns].ne(0).all(axis=1)]
+        class_0 = df[df['Label'] == 0]
+        class_1 = df[df['Label'] == 1]
+        combined = pd.concat([class_0[:2], class_1[:3]])
+        combined = combined.drop_duplicates().sample(frac=1).head(5)
+        return combined
+
+    # Apply filtering to both train and test data
+    train_df_filtered = filter_top_records(train_df)
+    test_df_filtered = filter_top_records(test_df)
+    
+    # Prepare data for response
+    response = {
+        'train_data': train_df_filtered.to_dict(orient='records'),
+        'test_data': test_df_filtered.to_dict(orient='records'),
+        'train_shape': train_df.shape,
+        'test_shape': test_df.shape,
+        'train_imbalance_ratio': train_imbalance_ratio,
+        'test_imbalance_ratio': test_imbalance_ratio
+    }
+
+    return jsonify(response), 200
+
 def load_data():
     with open('adhoc_data.json') as file:
         data = json.load(file)
@@ -194,15 +379,19 @@ def save_results(results, filename='model_results.csv'):
 @app.route('/logistic-regression', methods=['GET'])
 def run_logistic_regression():
     train_features, train_labels, test_features, test_labels = load_data()
-    
+    print(train_features, train_labels, test_features, test_labels)
     # Train Logistic Regression model
     model = LogisticRegression(max_iter=1000)
     start_time = time.time()
+    print(start_time)
     model.fit(train_features, train_labels)
     training_time = time.time() - start_time
     # Predict and calculate metrics
     train_predictions = model.predict(train_features)
     test_predictions = model.predict(test_features)
+    print("Length of test_labels:", len(test_labels))
+    print("Length of test_predictions:", len(test_predictions))
+
     metrics = {
         'classifier_type': 'Logistic Regression',
         'model_type': 'Classical ML',
@@ -214,7 +403,7 @@ def run_logistic_regression():
         'test_recall': round(recall_score(test_labels, test_predictions, average='weighted'), 2),
         'training_time': round(training_time, 2)
     }
-        
+    print(metrics)
     # Save results to a JSON file
     save_results(metrics)
     
@@ -478,13 +667,13 @@ def plot():
     # Load the data from the CSV file
     filename = 'model_results.csv'
     df = pd.read_csv(filename)
-    
+    # print(df)
     # Group by classifier_type and calculate the mean test_recall for each
     df_grouped = df.groupby('classifier_type')['test_recall'].mean().reset_index()
-
+    print(df_grouped)
     # Create a BytesIO buffer to save the plot image
     img = io.BytesIO()
-    
+    plt.clf()
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.barh(df_grouped['classifier_type'], df_grouped['test_recall'], color='skyblue')
@@ -495,7 +684,7 @@ def plot():
     # Save the plot to the BytesIO buffer
     plt.savefig(img, format='png')
     img.seek(0)
-    
+    plt.close('all')
     # Return the image as a response
     return send_file(img, mimetype='image/png')
 # if __name__ == '__main__':

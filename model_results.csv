@@ -1,0 +1,8 @@
+classifier_type,model_type,train_accuracy,train_precision,train_recall,test_accuracy,test_precision,test_recall
+Logistic Regression,Classical ML,1.0,1.0,1.0,1.0,1.0,1.0
+Decision Tree,Classical ML,1.0,1.0,1.0,1.0,1.0,1.0
+Random Forest,Classical ML,1.0,1.0,1.0,1.0,1.0,1.0
+Naive Bayes,Classical ML,0.96,0.96,0.96,1.0,1.0,1.0
+Gradient Boosting,Classical ML,1.0,1.0,1.0,1.0,1.0,1.0
+Variational Quantum Classifier,Quantum ML,0.58,0.835,0.58,0.75,0.958,0.75
+Classical SVM with Quantum Kernel,Quantum ML,0.98,0.98,0.98,1.0,1.0,1.0
