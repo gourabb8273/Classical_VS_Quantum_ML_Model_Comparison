@@ -327,7 +327,7 @@
     </header>
 
     <div class="container">
-        <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on Adhoc data
+        <!-- <h4>Compare classical machine learning algorithms with quantum machine learning algorithms on Adhoc data -->
         </h4>
 
         <!-- Input Section -->
@@ -395,7 +395,7 @@
         <div id="generatedDataSection" class="section">
             <h2>Generated Data</h2>
             <p id="data-info"></p>
-            <h4 id="heading-data">Training Data (Top 5 Sample)</h4>
+            <h4 id="heading-data">Training Data Sample</h4>
             <table id="trainTable" class="data-table">
                 <thead>
                     <tr>
@@ -407,7 +407,7 @@
                 </tbody>
             </table>
 
-            <h4 id="heading-data">Testing Data (Top 5 Sample)</h4>
+            <h4 id="heading-data">Testing Data Sample</h4>
             <table id="testTable" class="data-table">
                 <thead>
                     <tr>
@@ -490,8 +490,8 @@
 
     <script>
 
-        baseURL = 'https://classical-vs-quantum-ml-model-comparison.onrender.com/'
-        // baseURL = 'http://192.168.31.197:5000'
+        // baseURL = 'https://classical-vs-quantum-ml-model-comparison.onrender.com/'
+        baseURL = 'http://192.168.31.197:5000'
         function toggleImbalancedInput() {
             var dataType = document.querySelector('input[name="data_type"]:checked').value;
             var imbalancedInput = document.getElementById('imbalanced_ratio_container');
@@ -623,12 +623,13 @@
                     document.getElementById('generatedDataSection').style.display = 'block';
                     // Show data shapes and imbalance ratios
                     document.getElementById('data-info').innerHTML = `
-                    <ul>
-                    <li><strong>Training Data Shape:</strong> ${data.train_shape[0]} rows x ${data.train_shape[1]} columns</li>
-                    <li><strong>Testing Data Shape:</strong> ${data.test_shape[0]} rows x ${data.test_shape[1]} columns</li>
-                    <li><strong>Training Data Imbalance Ratio:</strong> Label 1 ${data.train_imbalance_ratio['Label 1']} - Label 0 ${data.train_imbalance_ratio['Label 0']}</li>
-                    <li><strong>Testing Data Imbalance Ratio: </strong> Label 1 ${data.test_imbalance_ratio['Label 1']} - Label 0 ${data.test_imbalance_ratio['Label 0']}</li>
+                    <ul style="font-family: 'Aptos', sans-serif; color: #333; line-height: 1.6;">
+                    <li><strong style="color: #007bff;">Training Data Shape:</strong> ${data.train_shape[0]} rows x ${data.train_shape[1]} columns</li>
+                    <li><strong style="color: #007bff;">Testing Data Shape:</strong> ${data.test_shape[0]} rows x ${data.test_shape[1]} columns</li>
+                    <li><strong style="color: #007bff;">Training Data Imbalance Ratio:</strong> Label 1: ${data.train_imbalance_ratio['Label 1']} (${data.train_class1_count} rows) - Label 0: ${data.train_imbalance_ratio['Label 0']} (${data.train_class0_count} rows)</li>
+                    <li><strong style="color: #007bff;">Testing Data Imbalance Ratio:</strong> Label 1: ${data.test_imbalance_ratio['Label 1']} (${data.test_class1_count} rows) - Label 0: ${data.test_imbalance_ratio['Label 0']} (${data.test_class0_count} rows)</li>
                 </ul>
+
                 `;
 
                     // Populate tables

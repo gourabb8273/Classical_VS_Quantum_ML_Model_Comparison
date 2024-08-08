@@ -29,6 +29,7 @@ from qiskit_machine_learning.algorithms import VQC
 import time
 from flask import Flask, jsonify, request, render_template
 import io
+import math
 
 app = Flask(__name__)
 CORS(app) 
@@ -164,7 +165,7 @@ def generate_data_endpoint():
 def generate_data_from_csv(training_size, test_size, feature_count, imbalance_ratio):
     print(training_size, test_size, feature_count, imbalance_ratio)
     # Load the dataset from CSV
-    df = pd.read_csv('./creditcard.csv')
+    df = pd.read_csv('./creditcard_filtered.csv')
     # Remove duplicate rows
     df = df.drop_duplicates()
     # Remove rows with any null values
@@ -194,8 +195,9 @@ def generate_data_from_csv(training_size, test_size, feature_count, imbalance_ra
     def calculate_sample_counts(total_size, imbalance_ratio):
         if imbalance_ratio >= 1:
             raise ValueError("Imbalance ratio must be less than 1.")
-        num_class1 = int(total_size * imbalance_ratio)
-        num_class0 = total_size - num_class1
+        num_class1 = math.ceil(total_size * imbalance_ratio)
+        num_class0 = math.ceil(total_size - num_class1)
+        # print(num_class0,num_class1)
         return num_class0, num_class1
 
     def sample_classes(df, class0_count, class1_count):
@@ -217,8 +219,8 @@ def generate_data_from_csv(training_size, test_size, feature_count, imbalance_ra
             # print(class0_count)
             # print(class0_samples)
         if class1_count > 0:
-            print(class1_count)
-            print(class1_samples)
+            # print(class1_count)
+            # print(class1_samples)
             class1_samples = class1_samples.sample(n=class1_count, random_state=42)
 
         # Combine the undersampled classes
@@ -293,14 +295,14 @@ def generate_data_from_csv(training_size, test_size, feature_count, imbalance_ra
     train_imbalance_ratio = calculate_imbalance_ratio(train_labels)
     test_imbalance_ratio = calculate_imbalance_ratio(test_labels)
 
-    return train_df, test_df, train_imbalance_ratio, test_imbalance_ratio
+    return train_df, test_df, train_imbalance_ratio, test_imbalance_ratio, train_class0_count, train_class1_count, test_class0_count, test_class1_count
 
 @app.route('/generate-fraud-data', methods=['POST'])
 def generate_fraud_data_endpoint():
     file_path = 'adhoc_data.json'
     
     data = request.json
-    print(data)
+    # print(data)
     try:
         training_size = data['training_size']
         test_size = data['test_size']
@@ -310,7 +312,7 @@ def generate_fraud_data_endpoint():
         return jsonify({'error': 'Missing required fields'}), 400
 
     try:
-        train_df, test_df, train_imbalance_ratio, test_imbalance_ratio = generate_data_from_csv(
+        train_df, test_df, train_imbalance_ratio, test_imbalance_ratio, train_class0_count, train_class1_count, test_class0_count, test_class1_count = generate_data_from_csv(
             training_size, test_size, adhoc_dimension, imbalance_ratio
         )
     except ValueError as e:
@@ -340,7 +342,11 @@ def generate_fraud_data_endpoint():
         'train_shape': train_df.shape,
         'test_shape': test_df.shape,
         'train_imbalance_ratio': train_imbalance_ratio,
-        'test_imbalance_ratio': test_imbalance_ratio
+        'test_imbalance_ratio': test_imbalance_ratio, 
+        'train_class0_count':train_class0_count,
+        'train_class1_count':train_class1_count, 
+        'test_class0_count':test_class0_count, 
+        'test_class1_count':test_class1_count
     }
 
     return jsonify(response), 200
@@ -379,18 +385,18 @@ def save_results(results, filename='model_results.csv'):
 @app.route('/logistic-regression', methods=['GET'])
 def run_logistic_regression():
     train_features, train_labels, test_features, test_labels = load_data()
-    print(train_features, train_labels, test_features, test_labels)
+    # print(train_features, train_labels, test_features, test_labels)
     # Train Logistic Regression model
     model = LogisticRegression(max_iter=1000)
     start_time = time.time()
-    print(start_time)
+    # print(start_time)
     model.fit(train_features, train_labels)
     training_time = time.time() - start_time
     # Predict and calculate metrics
     train_predictions = model.predict(train_features)
     test_predictions = model.predict(test_features)
-    print("Length of test_labels:", len(test_labels))
-    print("Length of test_predictions:", len(test_predictions))
+    # print("Length of test_labels:", len(test_labels))
+    # print("Length of test_predictions:", len(test_predictions))
 
     metrics = {
         'classifier_type': 'Logistic Regression',
@@ -403,7 +409,7 @@ def run_logistic_regression():
         'test_recall': round(recall_score(test_labels, test_predictions, average='weighted'), 2),
         'training_time': round(training_time, 2)
     }
-    print(metrics)
+    # print(metrics)
     # Save results to a JSON file
     save_results(metrics)
     
@@ -670,7 +676,7 @@ def plot():
     # print(df)
     # Group by classifier_type and calculate the mean test_recall for each
     df_grouped = df.groupby('classifier_type')['test_recall'].mean().reset_index()
-    print(df_grouped)
+    # print(df_grouped)
     # Create a BytesIO buffer to save the plot image
     img = io.BytesIO()
     plt.clf()
@@ -687,5 +693,5 @@ def plot():
     plt.close('all')
     # Return the image as a response
     return send_file(img, mimetype='image/png')
-# if __name__ == '__main__':
-#     app.run(host="0.0.0.0", debug=True)
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", debug=True)
